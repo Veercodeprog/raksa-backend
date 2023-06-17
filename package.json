@@ -1,7 +1,6 @@
 {
   "name": "raksa-backend",
   "version": "1.0.0",
-  "description": "",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -11,6 +10,10 @@
   "license": "ISC",
   "dependencies": {
     "agora-access-token": "^2.0.4",
-    "cors": "^2.8.5"
-  }
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "save": "^2.9.0"
+  },
+  "keywords": [],
+  "description": ""
 }
