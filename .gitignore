@@ -1,0 +1,40 @@
+# Logs
+logs/
+*.log
+
+# Environment variables
+.env
+
+# Dependency directories
+/node_modules
+/bower_components
+
+# Build artifacts
+/dist
+/build
+
+# Editor and IDE files
+.vscode/
+.idea/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Test coverage
+/coverage
+
+# Cache and temporary files
+.npm
+.npmrc
+.yarn
+.yarnrc
+.pnpm
+.pnpm-lock.yaml
+.pnp.js
+
+# System files
+.DS_Store
+ehthumbs.db
+Icon?
+Thumbs.db
