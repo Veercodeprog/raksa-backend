@@ -26,7 +26,7 @@ var APP_CERTIFICATE = "408aff3fd3044531ba832083fbbf59b4";
 app.use(bodyParser.json());
   const serviceAccountPath = process.env.FIREBASE_SERVICE_ACCOUNT_PATH
   console.log("serviceAccount", serviceAccountPath)
-  const resolvedPath = path.resolve(__dirname, serviceAccountPath);
+const resolvedPath = path.resolve(__dirname, 'config/', serviceAccountPath); // Adjust the path resolution to look for the file in the parent directory
   const serviceAccount = require(resolvedPath);
 
 
