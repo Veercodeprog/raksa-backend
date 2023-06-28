@@ -51,8 +51,6 @@ app.post('/setCustomClaims', async (req, res) => {
     const { phoneNumber, name, gender, birthDate, role } = req.body;
 
     // Create a Firestore document reference using the phone number as the ID
-
-
     const userRef = admin.firestore().collection('users').doc(phoneNumber);
 
     // Set the custom claims
