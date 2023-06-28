@@ -3,6 +3,7 @@ require('dotenv').config();
 const express = require("express");
 const app = express();
 const cors = require("cors");
+const path = require("path");
 app.use(express.json());
 const Agora = require("agora-access-token");
 const bodyParser = require('body-parser');
@@ -23,7 +24,10 @@ var APP_ID = "ca4c49f8e0774aa3b387f652fb6f6c05";
 var APP_CERTIFICATE = "408aff3fd3044531ba832083fbbf59b4";
 // Middleware to parse the request body
 app.use(bodyParser.json());
-const serviceAccount = require(process.env.SERVICE_ACCOUNT_PATH);
+  const serviceAccountPath = process.env.FIREBASE_SERVICE_ACCOUNT_PATH
+  console.log("serviceAccount", serviceAccountPath)
+  const resolvedPath = path.resolve(__dirname, serviceAccountPath);
+  const serviceAccount = require(resolvedPath);
 
 
 // const firebase_app = initializeApp();
