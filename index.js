@@ -21,7 +21,6 @@ const {
   FieldValue,
   Filter,
 } = require("firebase-admin/firestore");
-const { AgoraChat, default: agoraChat } = require('agora-chat');
 var APP_ID = "ca4c49f8e0774aa3b387f652fb6f6c05";
 var APP_CERTIFICATE = "408aff3fd3044531ba832083fbbf59b4";
 // Middleware to parse the request body
