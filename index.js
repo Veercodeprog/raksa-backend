@@ -9,6 +9,7 @@ const Agora = require("agora-access-token");
 const bodyParser = require('body-parser');
 var admin = require("firebase-admin");
 const functions = require("firebase-functions");
+const   AgoraChatToken = require('agora-token');
 const {
   initializeApp,
   applicationDefault,
@@ -20,6 +21,7 @@ const {
   FieldValue,
   Filter,
 } = require("firebase-admin/firestore");
+const { AgoraChat, default: agoraChat } = require('agora-chat');
 var APP_ID = "ca4c49f8e0774aa3b387f652fb6f6c05";
 var APP_CERTIFICATE = "408aff3fd3044531ba832083fbbf59b4";
 // Middleware to parse the request body
@@ -69,6 +71,48 @@ app.post('/setCustomClaims', async (req, res) => {
     res.status(500).json({ error: 'An error occurred while setting custom claims' });
   }
 });
+
+app.post('/setActualClaims', async (req, res) => {
+  const { uid, phoneNumber } = req.body;
+  try {
+    const usersCollection = admin.firestore().collection('users');
+    const userDoc = await usersCollection.doc(phoneNumber).get();
+    
+    const { role, gender, name, birthDate } = userDoc.data();
+    
+    // Set the user claims
+    await admin.auth().setCustomUserClaims(uid, { role, gender, name, birthDate });
+    
+    // Get the updated user claims
+    const updatedClaims = await admin.auth().getUser(uid);
+    
+    res.status(200).json(updatedClaims.customClaims);
+  } catch (error) {
+    console.log(error);
+    res.status(500).send('Error occurred while setting user claims.');
+  }
+});
+
+
+app.get('/checkPhoneNumberRegisteredFirestore', async (req, res) => {
+   const { phoneNumber } = req.query;
+const number = `+${phoneNumber.replace(/\s/g, "")}`;
+console.log("number:", number);
+ try {
+  
+    const usersCollection = admin.firestore().collection('users');
+    const userDoc = await usersCollection.doc(number).get();
+    const exists = userDoc.exists;
+    
+    res.json({ exists });
+  } catch (error) {
+    console.log('Error checking phone number:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Start the server
+
 app.get('/checkPhoneNumberRegistered', async (req, res) => {
   const { phoneNumber } = req.query;
 console.log("phonenumber:",phoneNumber)
@@ -80,6 +124,33 @@ console.log("number:", number);
     // User with the phone number already exists
     console.log('User with phone number exists:', userRecord.toJSON());
     res.json({ exists: true });
+  } catch (error) {
+    if (error.code === 'auth/user-not-found') {
+      // User with the phone number does not exist
+      console.log('User with phone number does not exist');
+      res.json({ exists: false });
+    } else {
+      console.log('Error checking phone number:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  }
+});
+app.get('/getUserDetails', async (req, res) => {
+  const { phoneNumber } = req.query;
+console.log("phonenumber:",phoneNumber)
+const number = `+${phoneNumber.replace(/\s/g, "")}`;
+console.log("number:", number);
+
+  try {
+
+    const usersCollection = admin.firestore().collection('users');
+    const userDoc = await usersCollection.doc(number).get();
+ if (userDoc.exists) {
+      const userData = userDoc.data();
+      res.json(userData);
+    } else {
+      res.status(404).json({ error: 'User not found' });
+    }
   } catch (error) {
     if (error.code === 'auth/user-not-found') {
       // User with the phone number does not exist
@@ -147,9 +218,40 @@ if(req.query.role === "publisher") role = Agora.RtmRole.PUBLISHER;
   // Send the options object as a response
   res.json(options);
 }
+const generateAccessTokenAgoraChat = (req, res) => {
+res.header("Access-Control-Allow-Origin", "*");
+  const {  userAccount } = req.query;
 
+var APP_ID_CHAT = "8f57fcb21dc34d64914372aecdfbd0f4";
+var APP_CERTIFICATE_CHAT = "3e4ed703e34f45918463146054761bb0";
+if( !userAccount) return res.status(400).json({ error: "channel and uid are required" })
+let role = Agora.RtmRole.SUBSCRIBER;
+if(req.query.role === "publisher") role = Agora.RtmRole.PUBLISHER;
+//   const role = req.body.isPublisher ? Agora.RtcRole.PUBLISHER : Agora.RtcRole.SUBSCRIBER;
+
+  const expirationTimeInSeconds = 3600;
+  const currentTimestamp = Math.floor(Date.now() / 1000);
+  const privilegeExpiredTs = currentTimestamp + expirationTimeInSeconds;
+
+  // Perform necessary operations with the channel and uid values
+  // For example, generate an access token based on the provided in formations  
+
+const accessToken = AgoraChatToken.ChatTokenBuilder.buildAppToken(APP_ID_CHAT, APP_CERTIFICATE_CHAT, privilegeExpiredTs);
+//  const accessToken = Agora.RtmTokenBuilder.buildToken(APP_ID, APP_CERTIFICATE,  userAccount, role, privilegeExpiredTs);
+  // const accessToken = Agora.RtmTokenBuilder.buildToken(APP_ID, APP_CERTIFICATE,  userAccount, role, privilegeExpiredTs);
+  // Prepare the options object with the required data
+  const options = {
+    appId: APP_ID, // Replace with your actual App ID
+    token: accessToken,
+
+  };
+
+  // Send the options object as a response
+  res.json(options);
+}
 app.get("/access_token",nocahe, generateAccessToken);
 app.get("/access_token_chat",nocahe, generateAccessTokenChat);
+app.get("/access_token_agorachat",nocahe, generateAccessTokenAgoraChat);
 app.post("/rtctoken", (req, res) => {
   // Generate Token Here
 });
